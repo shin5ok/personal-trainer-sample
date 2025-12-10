@@ -27,7 +27,7 @@ os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "True"
 # --- Agent 3: Schedule Agent ---
 schedule_agent = Agent(
     name="schedule_agent",
-    model="gemini-2.5-flash",
+    model="gemini-2.5-flash-lite",
     description="Handles scheduling the next appointment.",
     instruction="""
     You are the scheduling assistant.
@@ -41,7 +41,7 @@ schedule_agent = Agent(
 # --- Agent 2: Personal Trainer Agent ---
 personal_trainer_agent = Agent(
     name="personal_trainer_agent",
-    model="gemini-2.5-flash",
+    model="gemini-2.5-flash-lite",
     description="A personal trainer who conducts the training session and chat.",
     instruction="""
     You are a personal trainer.
@@ -68,11 +68,11 @@ personal_trainer_agent = Agent(
 # --- Agent 1: Receptionist Agent (Root) ---
 root_agent = Agent(
     name="root_agent",
-    model="gemini-2.5-flash",
+    model="gemini-2.5-flash-lite",
     description="A personal trainer assistant",
     instruction="""
-    You are the gym receptionist.
-    1. Warmly greet the user with "Welcome back!".
+    You are the gym receptionist. Speak all in Japanese.
+    1. Warmly greet the user with "Welcome back!" in Japanese.
     2. Ask for their name.
     3. Call the `get_user_data` tool with the provided name.
     4. If the user is found (tool returns success):
