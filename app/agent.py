@@ -13,59 +13,76 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
-from zoneinfo import ZoneInfo
-
-from google.adk.agents import Agent
-from google.adk.apps.app import App
-
 import os
 import google.auth
+from google.adk.agents import Agent
+from google.adk.apps.app import App
+from .tools import get_user_data, save_session_data, book_schedule
 
 _, project_id = google.auth.default()
 os.environ["GOOGLE_CLOUD_PROJECT"] = project_id
 os.environ["GOOGLE_CLOUD_LOCATION"] = "global"
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "True"
 
+# --- Agent 3: Schedule Agent ---
+schedule_agent = Agent(
+    name="schedule_agent",
+    model="gemini-2.5-flash",
+    description="Handles scheduling the next appointment.",
+    instruction="""
+    You are the scheduling assistant.
+    1. Ask the user when they would like to come for their next session.
+    2. Once they provide a date/time, use the `book_schedule` tool to register it.
+    3. After booking, say "Looking forward to seeing you next time!" and end the conversation.
+    """,
+    tools=[book_schedule],
+)
 
-def get_weather(query: str) -> str:
-    """Simulates a web search. Use it get information on weather.
+# --- Agent 2: Personal Trainer Agent ---
+personal_trainer_agent = Agent(
+    name="personal_trainer_agent",
+    model="gemini-2.5-flash",
+    description="A personal trainer who conducts the training session and chat.",
+    instruction="""
+    You are a personal trainer.
+    
+    **Your Character:**
+    {character}
+    
+    **User History:**
+    {user_history}
+    
+    **Responsibilities:**
+    1. Start the conversation based on your character and the user's history.
+    2. Provide training advice, chat, and motivate the user.
+    3. Keep track of the session's content.
+    4. If the user indicates they want to finish (e.g., "I'm done", "That's enough", "See you"), do the following:
+       - Summarize the session.
+       - Call `save_session_data` with the summary.
+       - Say goodbye and transfer the user to the `schedule_agent`.
+    """,
+    tools=[save_session_data],
+    sub_agents=[schedule_agent],
+)
 
-    Args:
-        query: A string containing the location to get weather information for.
-
-    Returns:
-        A string with the simulated weather information for the queried location.
-    """
-    if "sf" in query.lower() or "san francisco" in query.lower():
-        return "It's 60 degrees and foggy."
-    return "It's 90 degrees and sunny."
-
-
-def get_current_time(query: str) -> str:
-    """Simulates getting the current time for a city.
-
-    Args:
-        city: The name of the city to get the current time for.
-
-    Returns:
-        A string with the current time information.
-    """
-    if "sf" in query.lower() or "san francisco" in query.lower():
-        tz_identifier = "America/Los_Angeles"
-    else:
-        return f"Sorry, I don't have timezone information for query: {query}."
-
-    tz = ZoneInfo(tz_identifier)
-    now = datetime.datetime.now(tz)
-    return f"The current time for query {query} is {now.strftime('%Y-%m-%d %H:%M:%S %Z%z')}"
-
-
+# --- Agent 1: Receptionist Agent (Root) ---
 root_agent = Agent(
     name="root_agent",
-    model="gemini-3-pro-preview",
-    instruction="You are a helpful AI assistant designed to provide accurate and useful information.",
-    tools=[get_weather, get_current_time],
+    model="gemini-2.5-flash",
+    description="A personal trainer assistant",
+    instruction="""
+    You are the gym receptionist.
+    1. Warmly greet the user with "Welcome back!".
+    2. Ask for their name.
+    3. Call the `get_user_data` tool with the provided name.
+    4. If the user is found (tool returns success):
+       - Tell them "I'll call your personal trainer now."
+       - Transfer control to the `personal_trainer_agent`.
+    5. If the user is NOT found:
+       - Politely ask for the name again.
+    """,
+    tools=[get_user_data],
+    sub_agents=[personal_trainer_agent],
 )
 
 app = App(root_agent=root_agent, name="app")
