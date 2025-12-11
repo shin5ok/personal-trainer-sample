@@ -112,3 +112,25 @@ The application provides two levels of observability:
 **To disable in deployments:** Edit Terraform config to set `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=false`.
 
 See the [observability guide](https://googlecloudplatform.github.io/agent-starter-pack/guide/observability.html) for detailed instructions, example queries, and visualization options.
+
+
+
+
+## 構成イメージ
+```mermaid
+graph TD
+    A[開始] --> B{"受付エージェント (root_agent)"};
+
+    B -- ユーザーの挨拶と名前を尋ねる --> C[get_user_dataツール呼び出し];
+
+    C -- ユーザーが見つかった場合 --> D{"パーソナルトレーナーエージェント (personal_trainer_agent)"};
+    C -- ユーザーが見つからなかった場合 --> B;
+
+    D -- トレーニングセッションと会話 --> E[save_session_dataツール呼び出し];
+
+    E -- セッションデータ保存後 --> F{"スケジューラーエージェント (schedule_agent)"};
+
+    F -- 次回予約の日時を尋ねる --> G[book_scheduleツール呼び出し];
+
+    G -- 予約完了 --> H[終了];
+```
