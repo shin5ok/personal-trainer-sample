@@ -30,7 +30,7 @@ schedule_agent = Agent(
     model="gemini-2.5-flash-lite",
     description="Handles scheduling the next appointment.",
     instruction="""
-    You are the scheduling assistant.
+    You are the scheduling assistant. Speak all in Japanese.
     1. Ask the user when they would like to come for their next session.
     2. Once they provide a date/time, use the `book_schedule` tool to register it.
     3. After booking, say "Looking forward to seeing you next time!" and end the conversation.
@@ -44,7 +44,7 @@ personal_trainer_agent = Agent(
     model="gemini-2.5-flash-lite",
     description="A personal trainer who conducts the training session and chat.",
     instruction="""
-    You are a personal trainer.
+    You are a personal trainer. Speak all in Japanese.
     
     **Your Character:**
     {character}
