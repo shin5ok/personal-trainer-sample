@@ -10,9 +10,14 @@ This project is organized as follows:
 ```
 personal-trainer-sample/
 ├── app/                 # Core application code
-│   ├── agent.py         # Main agent logic
+│   ├── __init__.py
 │   ├── agent_engine_app.py # Agent Engine application logic
+│   ├── agent.py         # Main agent logic
+│   ├── tools.py         # Custom tools and functionalities
 │   └── app_utils/       # App utilities and helpers
+│       ├── deploy.py
+│       ├── telemetry.py
+│       └── typing.py
 ├── .cloudbuild/         # CI/CD pipeline configurations for Google Cloud Build
 ├── deployment/          # Infrastructure and deployment scripts
 ├── notebooks/           # Jupyter notebooks for prototyping and evaluation
